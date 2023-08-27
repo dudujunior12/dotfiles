@@ -1,5 +1,11 @@
 # Nvim Settings
 
+## Requirements
+- nvim
+- python3
+- npm
+
+
 ## Commands for clean installation
 ```
 rm -rf ~/.config/nvim
