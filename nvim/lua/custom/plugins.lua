@@ -1,5 +1,9 @@
 local plugins = {
   {
+    'Exafunction/codeium.vim',
+    event = 'BufEnter'
+  },
+  {
     "rcarriga/nvim-dap-ui",
     dependencies = "mfussenegger/nvim-dap",
     config = function()
@@ -68,6 +72,9 @@ local plugins = {
     build = function()
       vim.fn["mkdp#util#install"]()
     end,
+  },
+  {
+    "mg979/vim-visual-multi",
   },
 }
 return plugins
