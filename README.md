@@ -3,8 +3,8 @@
 ## Fish
 
 ### Requirements
-- bat
-- exa
+- bat (https://github.com/sharkdp/bat)
+- exa (https://the.exa.website/install/linux)
 
 ### Installation
 
