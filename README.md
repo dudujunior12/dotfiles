@@ -37,9 +37,11 @@
 ## Neovim
 
 ### Requirements
-- python3
+- python3.11
 - python3-dotenv
 - npm
+- ruff
+- mypy
 
 ### Installation
 *On Linux*
@@ -54,7 +56,10 @@ https://github.com/neovim/neovim/blob/master/INSTALL.md
 
 #### Copy neovim settings
     cp dotfiles/nvim ~/.config/
-    neovim
+    git clone https://github.com/nvim-neotest/nvim-nio.git
+    cp -r nvim-nio/* ~/.config/nvim/ | rm -rf nvim-nio
+    nvim
+    
 
 *This will install the plugins*
 
