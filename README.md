@@ -5,12 +5,17 @@
 ### Requirements
 - bat (https://github.com/sharkdp/bat)
 - exa (https://the.exa.website/install/linux)
+- fish (https://fishshell.com/)
 
 ### Installation
 
-#### Install fish
-    https://fishshell.com/
+
+
+#### Change terminal
     which fish
+
+*/usr/bin/fish*
+
     chsh user -s /usr/bin/fish
     set -U fish_user_paths $fish_user_paths ~/.local/bin
 
