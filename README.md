@@ -29,9 +29,33 @@
     fisher install jethrokuan/z
     fisher install jorgebucaran/autopair.fish
 
-#### Clone repository
-    git https://github.com/dudujunior12/dotfiles.git
-    cd dotfiles
-    cp fish/config.fish ~/.config/fish
+#### Copy fish settings
+    cp dotfiles/fish/config.fish ~/.config/fish
 
 *Reload terminal*
+
+## Neovim
+
+### Requirements
+- python3
+- python3-dotenv
+- npm
+
+### Installation
+*On Linux*
+
+#### Download tar.gz
+https://github.com/neovim/neovim/blob/master/INSTALL.md
+
+#### Copy binaries
+    sudo cp -r nvim-linux64/bin/* /usr/local/bin/
+    sudo cp -r nvim-linux64/lib/* /usr/local/lib/
+    sudo cp -r nvim-linux64/share/* /usr/local/share/
+
+#### Copy neovim settings
+    cp dotfiles/nvim ~/.config/
+    neovim
+
+*This will install the plugins*
+
+
