@@ -25,6 +25,8 @@
     curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher
 
 #### Install plugins
+    git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf 
+    ~/.fzf/install
     fisher install PatrickF1/fzf.fish
     fisher install jethrokuan/z
     fisher install jorgebucaran/autopair.fish
