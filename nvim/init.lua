@@ -1,4 +1,5 @@
 local g = vim.g
+local fn = vim.fn
 local opt = vim.opt
 local home_dir = os.getenv("HOME")
 local command = vim.api.nvim_command
@@ -8,18 +9,15 @@ g.maplocalleader = "\\"
 
 -- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not (vim.uv or vim.loop).fs_stat(lazypath) then
-  local lazyrepo = "https://github.com/folke/lazy.nvim.git"
-  local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
-  if vim.v.shell_error ~= 0 then
-    vim.api.nvim_echo({
-      { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
-      { out, "WarningMsg" },
-      { "\nPress any key to exit..." },
-    }, true, {})
-    vim.fn.getchar()
-    os.exit(1)
-  end
+if not vim.loop.fs_stat(lazypath) then
+	fn.system({
+		"git",
+		"clone",
+		"--filter=blob:none",
+		"https://github.com/folke/lazy.nvim.git",
+		"--branch=stable", -- latest stable release
+		lazypath,
+	})
 end
 vim.opt.rtp:prepend(lazypath)
 
@@ -52,18 +50,11 @@ require("lazy").setup({
           }
         } 
     },
-    {"windwp/nvim-autopairs", 
+    {"windwp/nvim-autopairs",
         opts = {
             event = "InsertEnter",
             config = true
         }
-    },
-    {
-        "lukas-reineke/indent-blankline.nvim",
-        main = "ibl",
-        ---@module "ibl"
-        ---@type ibl.config
-        opts = {},
     },
     {
         "folke/tokyonight.nvim",
@@ -73,26 +64,33 @@ require("lazy").setup({
         },
     },
     {"xiyaowong/nvim-transparent"},
-    {"nvim-treesitter/nvim-treesitter", 
-        opts = {
-            build = ":TSUpdate",
-            hightlight = {
-                enable = true,
-            },
-            indent = {
-                enable = true,
-            },
-            ensure_installed = {"c", "lua", "vim", "vimdoc", "query", "markdown", "markdown_inline"},
-            sync_install = false,
-            auto_install = true,
-        },
+    {"nvim-treesitter/nvim-treesitter",
+        config = function()
+            require('nvim-treesitter.configs').setup({
+                build = ":TSUpdate",
+                highlight = { enable = true },
+                indent = { enable = true },
+                ensure_installed = {
+                    "bash", "c", "diff", "html", "javascript", "jsdoc", "json", "jsonc", "lua",
+                    "luadoc", "luap", "markdown", "markdown_inline", "printf", "python", "query",
+                    "regex", "toml", "tsx", "java", "typescript", "vim", "vimdoc", "xml", "yaml",
+                },
+                sync_install = false,
+            })
+        end,
     },
     {"nvim-telescope/telescope.nvim", dependencies = {"nvim-lua/plenary.nvim"}},
-    {
-        "jose-elias-alvarez/null-ls.nvim",
-        ft = {"python"},
-    },
     {"neovim/nvim-lspconfig"},
+    {
+    "jose-elias-alvarez/null-ls.nvim",
+        ft = {"python"},
+        dependencies = {
+            "williamboman/mason.nvim",      -- Ensure mason is installed
+            "williamboman/mason-lspconfig.nvim",
+            "jayp0521/mason-null-ls.nvim",  -- Add mason-null-ls integration
+        }
+    },
+
     {
         "williamboman/mason.nvim",
         opts = {
@@ -104,8 +102,8 @@ require("lazy").setup({
         build = ":MasonUpdate",
         dependencies = {
             {
-                "williamboman/mason-lspconfig.nvim", 
-                lazy = false, 
+                "williamboman/mason-lspconfig.nvim",
+                lazy = false,
             },
         },
         config = function()
@@ -134,19 +132,27 @@ require("lazy").setup({
     {"kyazdani42/nvim-web-devicons"},
     {"robbles/logstash.vim"},
     {
-        "Exafunction/codeium.nvim",
-        dependencies = {
-            "nvim-lua/plenary.nvim",
-            "hrsh7th/nvim-cmp",
-        },
-        config = function()
-            require("codeium").setup({
-            })
-        end
+        "mfussenegger/nvim-jdtls",
+        ft = { "java" },
+    },
+    {"mfussenegger/nvim-dap",
+	    dependencies = {
+		"rcarriga/nvim-dap-ui",
+		"theHamsta/nvim-dap-virtual-text",
+		"nvim-neotest/nvim-nio", -- Add this line
+	    },
+	    config = function()
+		require("dapui").setup()
+		require("nvim-dap-virtual-text").setup()
+	    end,
+	},
+    {
+      'Exafunction/codeium.vim',
+      event = 'BufEnter'
     },
     {"rafamadriz/friendly-snippets"},
     {"lewis6991/gitsigns.nvim"},
-    {"folke/which-key.nvim"}
+    {"folke/which-key.nvim"},
   },
 
   -- Configure any other settings here. See the documentation for more details.
@@ -223,7 +229,13 @@ map("n", "<C-b>", ":Telescope buffers<CR>", { silent = true })
 map("n", "<Leader>tr", "<cmd>Telescope resume<CR>", { silent = true })
 map("n", "<Leader>r", "<cmd>Telescope live_grep<CR>", { silent = true })
 map("n", "<Leader>d", "<cmd>Telescope diagnostics<CR>", { silent = true })
-map("n", "gd", "<cmd>Telescope lsp_definitions<CR>", { silent = true })
+vim.api.nvim_set_keymap('n', 'gd', ':lua vim.lsp.buf.definition()<CR>', { noremap = true, silent = true })
+
+-- copy and paste
+map("v", "<C-C>", '"+y')
+map("", "<C-V>", '"+p')
+
+local capabilities = require("cmp_nvim_lsp").default_capabilities(vim.lsp.protocol.make_client_capabilities())
 
 require("mason").setup({})
 require("mason-lspconfig").setup({
@@ -262,6 +274,87 @@ lspconfig.pyright.setup({
 			},
 		},
 	},
+})
+
+lspconfig.jdtls.setup({
+    cmd = { 'jdtls' },
+    root_dir = lsp_util.root_pattern('.git', 'mvnw', 'gradlew'),
+})
+
+-- Initialize Mason for managing LSP servers and external tools
+require("mason").setup()
+
+-- Mason-null-ls setup for Python tools (black, pylint, isort)
+require("mason-null-ls").setup({
+    ensure_installed = { "black", "pylint", "isort" },
+})
+
+-- Null-ls setup for Python (formatter, linter, import sorter)
+local null_ls = require("null-ls")
+
+null_ls.setup({
+    sources = {
+        -- Python formatter (Black)
+        null_ls.builtins.formatting.black.with({
+            extra_args = { "--fast" },  -- Optional: Makes formatting faster
+        }),
+
+        -- Python import sorter (isort)
+        null_ls.builtins.formatting.isort,
+
+        -- Python linter (Pylint)
+        null_ls.builtins.diagnostics.pylint.with({
+            args = { "--output-format", "json", "--max-line-length", "100", "--disable=missing-module-docstring", "$FILENAME" },
+        }),
+    },
+})
+
+-- Define the custom_attach function
+local custom_attach = function(client, bufnr)
+  -- Keybindings for LSP
+  local bufopts = { noremap = true, silent = true, buffer = bufnr }
+  vim.keymap.set('n', 'gd', vim.lsp.buf.definition, bufopts)  -- Go to definition
+  vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)  -- Find references
+  vim.keymap.set('n', 'K', vim.lsp.buf.hover, bufopts)  -- Show hover info
+  vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, bufopts)  -- Rename symbol
+  vim.keymap.set('n', '<leader>ca', vim.lsp.buf.code_action, bufopts)  -- Code actions
+end
+
+lspconfig.pylsp.setup({
+    on_attach = custom_attach,
+    settings = {
+        pylsp = {
+            plugins = {
+                -- Formatter options
+                black = { enabled = true },
+                autopep8 = { enabled = false },
+                yapf = { enabled = false },
+                -- Linter options
+                pylint = { enabled = true, executable = "pylint" },
+                pyflakes = { enabled = false },
+                pycodestyle = { enabled = false },
+                -- Type checker
+                pylsp_mypy = { enabled = true },
+                -- Auto-completion options
+                jedi_completion = { fuzzy = true },
+                -- Import sorting
+                pyls_isort = { enabled = true },
+            },
+        },
+    },
+    flags = {
+        debounce_text_changes = 200,
+    },
+    capabilities = capabilities,
+})
+
+-- Set up autocmd to trigger formatting on save
+vim.api.nvim_create_autocmd("BufWritePre", {
+    pattern = "*.py",
+    callback = function()
+        -- This will trigger the formatter for Python files using null-ls
+        vim.lsp.buf.format({ async = true })
+    end,
 })
 
 opt.completeopt = "menu,menuone,noselect"
