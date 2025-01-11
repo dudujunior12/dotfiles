@@ -28,6 +28,7 @@ local function map(mode, lhs, rhs, opts)
 	end
 	vim.keymap.set(mode, lhs, rhs, options)
 end
+-- 
 
 -- Setup lazy.nvim
 require("lazy").setup({
@@ -66,20 +67,24 @@ require("lazy").setup({
     {"xiyaowong/nvim-transparent"},
     {"nvim-treesitter/nvim-treesitter",
         config = function()
-            require('nvim-treesitter.configs').setup({
+            require('nvim-treesitter.configs').setup(
+            ---@diagnostic disable: missing-fields
+            {
                 build = ":TSUpdate",
-                highlight = { enable = true },
-                indent = { enable = true },
-                ensure_installed = {
-                    "bash", "c", "diff", "html", "javascript", "jsdoc", "json", "jsonc", "lua",
-                    "luadoc", "luap", "markdown", "markdown_inline", "printf", "python", "query",
-                    "regex", "toml", "tsx", "java", "typescript", "vim", "vimdoc", "xml", "yaml",
-                },
+                highlight = { enable = true, disable = {}, },
+                indent = { enable = false, disable = {}, },
+                ensure_installed = { "c", "lua", "vim", "vimdoc", "query", "markdown", "markdown_inline", "python", "java" },
                 sync_install = false,
-            })
+                auto_install = true,
+            }
+            ---@diagnostic enable: missing-fields
+            )
         end,
     },
     {"nvim-telescope/telescope.nvim", dependencies = {"nvim-lua/plenary.nvim"}},
+    {"nvim-telescope/telescope-fzf-native.nvim", build = "make" },
+    "junegunn/fzf",
+	"junegunn/fzf.vim",
     {"neovim/nvim-lspconfig"},
     {
     "jose-elias-alvarez/null-ls.nvim",
@@ -147,6 +152,20 @@ require("lazy").setup({
 	    end,
 	},
     {
+        "linux-cultist/venv-selector.nvim",
+        dependencies = { "neovim/nvim-lspconfig", "nvim-telescope/telescope.nvim" },
+        config = function()
+          require("venv-selector").setup({
+            auto_refresh = true,
+            search = true, -- Habilita a busca automática de ambientes virtuais no diretório do projeto
+          })
+        end,
+        keys = {
+          { "<leader>vs", "<cmd>:VenvSelect<cr>", desc = "Selecionar Virtualenv" },
+          { "<leader>vc", "<cmd>:VenvSelectCached<cr>", desc = "Selecionar Virtualenv Cache" },
+        },
+    },
+    {
       'Exafunction/codeium.vim',
       event = 'BufEnter'
     },
@@ -159,7 +178,8 @@ require("lazy").setup({
   -- colorscheme that will be used when installing plugins.
   install = { colorscheme = { "tokyonight" }},
   -- automatically check for plugin updates
-  checker = { enabled = true },
+  checker = { enabled = true, notify = false },
+  change_detection = { notify = false},
 })
 
 vim.cmd[[colorscheme tokyonight]]
@@ -229,12 +249,29 @@ map("n", "<C-b>", ":Telescope buffers<CR>", { silent = true })
 map("n", "<Leader>tr", "<cmd>Telescope resume<CR>", { silent = true })
 map("n", "<Leader>r", "<cmd>Telescope live_grep<CR>", { silent = true })
 map("n", "<Leader>d", "<cmd>Telescope diagnostics<CR>", { silent = true })
-vim.api.nvim_set_keymap('n', 'gd', ':lua vim.lsp.buf.definition()<CR>', { noremap = true, silent = true })
 
 -- copy and paste
 map("v", "<C-C>", '"+y')
 map("", "<C-V>", '"+p')
 
+map("t", "<Esc>", "<C-\\><C-n>", { noremap = true, silent = true })
+
+require("telescope").setup({
+	extensions = {
+		fzf = {
+			fuzzy = true,
+			override_generic_sorter = true,
+			override_file_server = true,
+			case_mode = "smart_case",
+		},
+	},
+	defaults = {
+		file_ignore_patterns = { "node/no.*", ".git/" },
+	},
+})
+require("telescope").load_extension("fzf")
+
+-- LSP
 local capabilities = require("cmp_nvim_lsp").default_capabilities(vim.lsp.protocol.make_client_capabilities())
 
 require("mason").setup({})
