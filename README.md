@@ -4,7 +4,7 @@
 
 ### Requirements
 - bat (https://github.com/sharkdp/bat)
-- exa (https://the.exa.website/install/linux)
+- eza (https://github.com/eza-community/eza/blob/main/INSTALL.md)
 - fish (https://fishshell.com/)
 
 ### Installation
@@ -42,8 +42,6 @@
 - python3.11
 - python3-dotenv
 - npm
-- ruff
-- mypy
 
 ### Installation
 *On Linux*
@@ -58,8 +56,6 @@ https://github.com/neovim/neovim/blob/master/INSTALL.md
 
 #### Copy neovim settings
     cp dotfiles/nvim ~/.config/
-    git clone https://github.com/nvim-neotest/nvim-nio.git
-    cp -r nvim-nio/* ~/.config/nvim/ | rm -rf nvim-nio
     nvim
     
 
