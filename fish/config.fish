@@ -19,8 +19,7 @@ bind \e\[1\;3D prevd
 bind \e\[1\;3C nextd
 #source $HOME/work/.config/fish/abbr.fish
 alias cat="bat"
-alias ls="exa"
-alias ssh="kitty +kitten ssh -X"
+alias ls="eza --icons --sort size --hyperlink"
 # alias ssha="kitty +kitten ssh -X ejunior@saber"
 alias reflector="sudo reflector --latest 5 --sort rate --protocol https --country Brazil --country US --country POrtugal --country Japan --save /etc/pacman.d/mirrorlist"
 
@@ -40,4 +39,5 @@ set -U VISUAL nvim
 # status is-interactive; and pyenv virtualenv-init - | source
 # end pyenv configuration
 set -x GPG_TTY (tty)
-fish_add_path /home/anscient/.spicetify
+#set -x JAVA_HOME /usr/lib/jvm/java-21-openjdk
+#fish_add_path /home/anscient/.spicetify
